@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""A very simple MNIST classifier.
+"""An advanced deep MNIST classifier.
 
 See extensive documentation at
 http://tensorflow.org/tutorials/mnist/beginners/index.md
@@ -28,6 +28,7 @@ import sys
 from tensorflow.examples.tutorials.mnist import input_data
 
 import tensorflow as tf
+import numpy as np
 
 sess = tf.InteractiveSession()
 
@@ -103,8 +104,12 @@ def main(_):
   correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
   accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
   sess.run(tf.global_variables_initializer())
-  for i in range(20000):
-    batch = mnist.train.next_batch(50)
+
+  batchSize = 50;
+  epochs    = 20000;
+
+  for i in range(epochs):
+    batch = mnist.train.next_batch(batchSize)
     if i%100 == 0:
       train_accuracy = accuracy.eval(feed_dict={
           x:batch[0], y_: batch[1], keep_prob: 1.0})
@@ -112,10 +117,17 @@ def main(_):
     train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
 
 
+  #Evaluate like this to save GPU Memory
+  accuracyLevels = []
 
-  for i in xrange(10):
-    testSet = mnist.test.next_batch(50)
-    print("test accuracy %g"%accuracy.eval(feed_dict={ x: testSet[0], y_: testSet[1], keep_prob: 1.0}))
+  for i in xrange(epochs):
+    testSet = mnist.test.next_batch(batchSize)
+    #print("test accuracy %g"%accuracy.eval(feed_dict={ x: testSet[0], y_: testSet[1], keep_prob: 1.0}))
+    accuracyLevels.append(accuracy.eval(feed_dict={ x: testSet[0], y_: testSet[1], keep_prob: 1.0}))
+    #print(accuracy.eval(feed_dict={ x: testSet[0], y_: testSet[1], keep_prob: 1.0}))
+
+  average = np.mean(accuracyLevels)
+  print(average)
 
 
 if __name__ == '__main__':
