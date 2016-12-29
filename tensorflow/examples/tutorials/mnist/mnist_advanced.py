@@ -33,14 +33,17 @@ sess = tf.InteractiveSession()
 
 FLAGS = None
 
+#Create good starting weights. For ReLU this shouldn't be zero, and should be slightly positive.
 def weight_variable(shape):
   initial = tf.truncated_normal(shape, stddev=0.1)
   return tf.Variable(initial)
 
+#Create good starting biases. For ReLU this shouldn't be zero, and should be slightly positive.
 def bias_variable(shape):
   initial = tf.constant(0.1, shape=shape)
   return tf.Variable(initial)
 
+#Enclose convolution and pooling operations into methods
 def conv2d(x, W):
   return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
@@ -55,13 +58,17 @@ def main(_):
   # Create the model
   x = tf.placeholder(tf.float32, [None, 784])
 
-  #From Tutorial
+  #First Convolutional Layer
+  #32 features for each 5x5 patch
   W_conv1 = weight_variable([5, 5, 1, 32])
   b_conv1 = bias_variable([32])
+
   x_image = tf.reshape(x, [-1,28,28,1])
+
   h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
   h_pool1 = max_pool_2x2(h_conv1)
 
+  #Second Convolutional Layer
   W_conv2 = weight_variable([5, 5, 32, 64])
   b_conv2 = bias_variable([64])
 
@@ -113,4 +120,3 @@ if __name__ == '__main__':
                       help='Directory for storing input data')
   FLAGS, unparsed = parser.parse_known_args()
   tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
-
